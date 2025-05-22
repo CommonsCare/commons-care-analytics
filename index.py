@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import plotly.express as px
+from pyrosm import OSM
 
 st.set_page_config(layout="wide")
 
