@@ -9,7 +9,7 @@ st.set_page_config(layout="wide")
 # Initialize session state
 def initialize_state():
     if "selected_goal" not in st.session_state:
-        st.session_state.selected_goal = "Financial Risk Protection"
+        st.session_state.selected_goal = "Access"
 
 
 initialize_state()
@@ -42,6 +42,16 @@ def load_sahie_data():
     return None
 
 
+@st.cache_data
+def load_hospital_pois(pbf_path):
+    osm = OSM(pbf_path)
+    pois = osm.get_pois()
+    pois = pois[pois.geometry.type == "Point"].copy()
+    pois["lon"] = pois.geometry.x
+    pois["lat"] = pois.geometry.y
+    return pois
+
+
 # Title
 st.title("🌐 System Goals Dashboard")
 st.markdown("---")
@@ -52,13 +62,16 @@ col1, col_div1, col2, col_div2, col3 = st.columns([0.7, 0.05, 3, 0.05, 1])
 # Intermediate Goals (left)
 with col1:
     st.markdown("### 🎯 Intermediate Goals")
-    for label in ["Access", "Quality", "Efficiency", "Equity"]:
-        st.button(
-            label,
-            disabled=True,
-            use_container_width=True,
-            help="Option currently unavailable",
-        )
+
+    if st.button("Access"):
+        st.session_state.selected_goal = "Access"
+
+    st.button("Quality", disabled=True, help="Option currently unavailable")
+
+    st.button("Efficiency", disabled=True, help="Option currently unavailable")
+
+    st.button("Equity", disabled=True, help="Option currently unavailable")
+
 
 # Divider 1
 with col_div1:
@@ -286,7 +299,74 @@ with col2:
         else:
             st.error("❌ SAHIE 2022 data not found.")
 
-# Divider 2
+    elif st.session_state.selected_goal == "Access":
+        st.success("Access panel is under construction.")
+
+        # Load data
+        pois = load_hospital_pois("health_filtered.osm.pbf")
+
+        HEALTH_AMENITIES = {
+            "hospital": "🏥 Hospital",
+            "clinic": "🏨 Clinic",
+            "doctors": "👨‍⚕️ Doctor",
+            "dentist": "🦷 Dentist",
+            "pharmacy": "💊 Pharmacy",
+            "nursing_home": "🏡 Nursing Home",
+            "rehabilitation": "🧠 Rehabilitation",
+            "birthing_center": "🤱 Birthing Center",
+            "alternative": "🌿 Alternative Medicine",
+            "physiotherapist": "🏃 Physiotherapy",
+            "psychotherapist": "🧘 Psychotherapy",
+            "healthcare": "🏪 Healthcare (Unspecified)",
+            "first_aid": "🩹 First Aid",
+            "blood_donation": "🩸 Blood Donation",
+        }
+
+        selected_amenities = st.multiselect(
+            "Select health amenities to display",
+            options=list(HEALTH_AMENITIES.keys()),
+            format_func=lambda x: HEALTH_AMENITIES[x],
+            default=["hospital", "clinic"],
+        )
+
+        filtered_pois = pois[pois["amenity"].isin(selected_amenities)]
+        filtered_pois["icon_label"] = filtered_pois["amenity"].map(HEALTH_AMENITIES)
+
+        fig = px.scatter_mapbox(
+            filtered_pois,
+            lat="lat",
+            lon="lon",
+            color="amenity",
+            hover_name="name",
+            hover_data={
+                "amenity": True,
+                "lat": False,
+                "lon": False,
+            },
+            zoom=3,
+            height=800,
+            color_discrete_sequence=px.colors.qualitative.Safe,
+        )
+
+        fig.update_layout(
+            mapbox_style="carto-positron",
+            margin={"r": 10, "t": 10, "l": 10, "b": 10},
+            legend=dict(
+                title="Amenity Type",
+                orientation="v",  # vertical layout
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01,
+                font=dict(size=12),
+                bgcolor="rgba(255,255,255,0.7)",
+            ),
+            font=dict(family="Arial", size=14),
+        )
+
+        # Display in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
+
 with col_div2:
     st.markdown(
         "<div style='height: 320px; border-left: 1px solid gray;'></div>",
