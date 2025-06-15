@@ -98,6 +98,16 @@ div.stButton > button:disabled {
   margin-bottom: 1rem;
 }
 
+.stVerticalBlock .st-key-financial_risk_container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
 /* HALE Container  */
 .stVerticalBlock .st-key-hale_container {
   background: rgba(255, 255, 255, 0.95);
