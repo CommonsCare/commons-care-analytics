@@ -4,6 +4,7 @@
 import streamlit as st
 from src.sections import health_outcome, financial_risk_protection, access
 from streamlit_extras.stylable_container import stylable_container
+from datetime import datetime
 
 st.set_page_config(layout="wide")
 
@@ -124,3 +125,26 @@ with col3:
         """,
             unsafe_allow_html=True,
         )
+
+access_date = datetime.today().strftime("%B %d, %Y")
+
+st.markdown(
+    """
+---
+
+Data Source & Acknowledgement:  
+This dashboard uses data from the [Institute for Health Metrics and Evaluation (IHME)](http://www.healthdata.org/
+), a global health research center at the University of Washington.  
+Citation: Institute for Health Metrics and Evaluation (IHME). GBD Compare. Seattle, WA: IHME, University of Washington, 2015. Available from [http://vizhub.healthdata.org/gbd-compare](http://vizhub.healthdata.org/gbd-compare). (Accessed {}).  
+
+*Explore & Contribute on GitHub*  
+Curious about how this dashboard works or have ideas to make it better? You're welcome to check out the code and contribute on [GitHub](https://github.com/adhikari-shubham/Care-Commons
+).  
+Feel free to open an issue or submit a pull request if you have suggestions, want to add new visualizations, or know of other useful data snippets we should include.
+ 
+
+---
+""".format(
+        access_date
+    )
+)
